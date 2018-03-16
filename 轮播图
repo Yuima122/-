@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>轮播图</title>
+    <script src="js/jQuery.js"></script>
+    <style type="text/css">
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        ol{
+            list-style: none;
+        }
+        #lb{
+            position: relative;
+            width: 600%;
+            height: 280px;
+            list-style: none;
+            left: 0;
+        }
+        #box{
+            width: 520px;
+            position: absolute;
+            left: 350px;
+            top:150px;
+            overflow: hidden;
+        }
+        #lb>li{
+            float: left;
+            width: 520px;
+        }
+        #yq>li{
+            float: left;
+            padding:1px 1px 1px 1px;
+            margin-right: 5px;
+            background: white;
+            width: 5px;
+            height: 5px;
+            border: 1px solid white;
+            border-radius:50%;
+            text-align: center;
+            position: relative;
+            left: 210px;
+            bottom: 50px;
+            cursor: pointer;
+
+        }
+        #yq>#first{
+            background: #ff4400;
+            border: 1px solid#ff4400;
+        }
+        #left{
+            position: relative;
+            width: 35px;
+            left: 350px;
+            top:280px;
+
+
+
+        }
+        #right{
+            position: relative;
+            width: 35px;
+            height: 35px;
+            left:798px;
+            top:280px;
+        }
+
+
+    </style>
+
+</head>
+<body>
+<div id="box">
+   <ul id="lb">
+       <li><a href="#"><img src="img/轮播1.jpeg"></a></li>
+       <li><a href="#"><img src="img/轮播2.jpg"></a></li>
+       <li><a href="#"><img src="img/轮播3.jpeg"></a></li>
+       <li><a href="#"><img src="img/轮播4.jpg"></a></li>
+       <li><a href="#"><img src="img/轮播5.jpg"></a></li>
+   </ul>
+    <!--<ol id="yq">
+        <li id="first"></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ol>-->
+
+</div>
+<div>
+    <img id="left" src="img/上一个.png">
+    <img id="right" src="img/下一个.png">
+</div>
+
+
+
+<script src="js/jQuery.js"></script>
+<script>
+
+    //由于每个小圆是按照照片数目生成，故由JS完成
+    var box=document.getElementById("box");//获得大盒子
+    var ul=document.getElementById("lb");//获得UL
+    var ulLis=ul.children;//获得UL下所有的LI，方便计数
+    var liWidth=ul.children[0].offsetWidth;//获得Li的宽度
+    //操作元素，将第一个照片克隆，实现无缝轮播
+    ul.appendChild(ul.children[0].cloneNode(true));
+    //创建ol 和 li
+    var ol=document.createElement("ol");
+    box.appendChild(ol);//添加ol元素到大盒子
+    for (var i=0;i<ulLis.length-1;i++)
+    {
+        var li=document.createElement("li");
+        ol.appendChild(li);
+    }
+    ol.id="yq";
+    ol.children[0].id="first";
+    //轮播开始
+    //设置一个轮播器，进行自动轮播
+
+    //封装的动画函数
+    //obj参数表示谁动，target参数表示动多少，sep参数表示匀速运动的速度默认值为10毫秒刷新
+    function animate(obj,target,sep) {
+        sep=sep||"10";
+        // 首先清除掉定时器
+        clearInterval(obj.timer);
+        // 用来判断 是+ 还是 -  即说明向左走还是向右走
+        var speed = obj.offsetLeft < target ? 15 : -15;
+        obj.timer = setInterval(function(){
+            var result = target - obj.offsetLeft;//它们的差值不能小于speed
+            obj.style.left = obj.offsetLeft + speed + "px";
+            // 有可能有小于的存在，所以在这里要做个判断，若小于则直接完成
+            // math.abs提取绝对值
+            if (Math.abs(result) <= Math.abs(speed)) {
+                clearInterval(obj.timer);
+                clearInterval(timer);
+                obj.style.left = target + "px";
+            }
+        },sep);
+
+    }
+    var timer; //轮播图的定时器
+    var key=0 ; //记录第几张图片
+    var circle=0;//记录是第几个圆圈
+    var time;
+
+        time = setInterval(auto, 4000);
+
+        function auto() {
+
+            timer = setInterval(autoplay, 1000);
+
+            function autoplay(sep) {
+                /*自动轮播时,要对播放的张数key进行一个判断,如果播放的张数超过ulLis.length-1,
+        就要重头开始播放.  因为我们克隆了第一张并将其放在最后面,所以我们要从第二张图片开始播放*/
+                key++;
+                //若小于第一张，则返回第五张
+                if (key < 0) {
+                    ul.style.left = -liWidth * 5 + "px";
+                    key = 4;
+                }
+                //若超过第六张，则返回第二张
+                if (key > ulLis.length - 1) {
+                    ul.style.left = 0;
+                    key = 1;//让照片从第二章继续轮播
+                }
+                //轮播开始
+                animate(ul, -key * liWidth, sep);
+                //定义小圆圈运动 当显示第几张图时，小圆对应相应图片，颜色发生变化
+                circle++;
+                if (circle > ol.children.length - 1) {
+                    circle = 0;
+                }
+                if (circle < 0) {
+                    circle = 4;
+                }
+                //圆圈颜色发生变化
+                for (i = 0; i < ol.children.length; i++) {
+                    ol.children[i].id = "";
+                }
+                ol.children[circle].id = "first";
+
+            }
+
+            //设定前进后退图标
+            //图标指定消失,鼠标移到图标显色
+            $(document).ready(
+                function () {
+                    $("#lb").mouseover(
+                        function () {
+                            $("#left").show();
+                            $("#right").show();
+
+                        }
+                    )
+
+                });
+            $(document).ready(
+                function () {
+                    $("#lb").mouseout(
+                        function () {
+                            $("#left").hide();
+                            $("#right").hide();
+
+                        }
+                    )
+
+                }
+            );
+            $(document).ready(
+                function () {
+                    $("#left").mouseover(
+                        function () {
+                            $("#right").show();
+                            $("#left").show();
+                            $("#left").attr("src", "img/上一个1.png");
+
+
+                        }
+                    )
+
+                });
+            $(document).ready(
+                function () {
+                    $("#left").mouseout(
+                        function () {
+                            $("#left").attr("src", "img/上一个.png");
+
+
+                        }
+                    )
+
+                });
+            $(document).ready(
+                function () {
+                    $("#right").mouseover(
+                        function () {
+                            $("#left").show();
+                            $("#right").show();
+                            $("#right").attr("src", "img/下一个(1).png");
+
+                        }
+                    )
+
+                });
+            $(document).ready(
+                function () {
+                    $("#right").mouseout(
+                        function () {
+                            $("#right").attr("src", "img/下一个.png");
+
+                        }
+                    )
+
+                });
+
+            // 点击改变图片事件
+            var left = document.getElementById("left");
+            var right = document.getElementById("right");
+
+            // 动画函数
+            //sep用于改变图片轮播速度的参数，默认为10
+            //设置了外部计时器，也可以使用setTimeOut来控制setInterval(timer)重新执行
+            function animateImg(keynum, circlenum, sep) {
+                key = key + keynum;
+                circle = circle + circlenum;
+                clearInterval(timer);
+                autoplay(sep);
+
+            }
+
+            left.onclick = function () {
+                animateImg(-2, -2, 5);
+            };
+            right.onclick = function () {
+                animateImg(0, 0, 5);
+
+            };
+            //点击小圆改变图片
+            ol.children[0].onclick = function () {
+
+                animateImg(-1 - key, -1 - circle, 1);
+            };
+            ol.children[1].onclick = function () {
+
+                animateImg(-key, -circle, 1);
+            };
+            ol.children[2].onclick = function () {
+
+                animateImg(1 - key, 1 - circle, 1);
+            };
+            ol.children[3].onclick = function () {
+
+                animateImg(2 - key, 2 - circle, 1);
+            };
+            ol.children[4].onclick = function () {
+
+                animateImg(3 - key, 3 - circle, 1);
+            };
+        }
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>
